@@ -28,7 +28,7 @@ function App() {
   return (
     <div className="App">
       <header>
-        
+      <SignOut />
       </header>
       <section>
         {user ? <ChatRoom /> : <SignIn />}
@@ -44,7 +44,7 @@ function SignIn(){
     auth.signInWithPopup(provider);
   }
   return(
-    <button onClick={signInWithGoogle}>Sign In signInWithGoogle</button>
+    <button className='sign-in' onClick={signInWithGoogle}>Sign In signInWithGoogle</button>
   )
 }
 
@@ -55,15 +55,41 @@ function SignOut(){
 }
 
 function ChatRoom(){
+  const dummy = useRef() //hook
+
   const messageRef = firestore.collection('messages');
   const query = messageRef.orderBy('createdAt').limit(25);
 
   const [messages] = useCollectionData(query, {idField: 'id'}); //data hook, listening to query
-  return(
+  
+  const [formValue, setFormValue] = useState(''); //stateful value
+
+  const sendMessage = async(e) => { //event handler
+    e.preventDefault();
+    const { uid, photoURL} = auth.currentUser;
+    await messageRef.add({
+      text: formValue,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      uid,
+      photoURL
+    });
+
+    setFormValue('');
+
+    dummy.current.scrollIntoView({behaivor: 'smooth'});
+  } 
+
+  return( //the dummy serves as reference for auto scroll
     <>
-      <div>
+      <main>
         {messages && messages.map(msg => <ChatMessage key = {msg.id} message = {msg}/>)}
-      </div>
+        <span ref={dummy}></span> 
+      </main>
+
+      <form onSubmit={sendMessage}>
+        <input value={formValue} onChange={(e) => setFormValue(e.target.value)} placeholder="write your message here..."/>
+        <button type='submit'>SEND</button>
+      </form>
     </>
   )
 }
@@ -71,7 +97,7 @@ function ChatRoom(){
 function ChatMessage(props){
   const {text, uid, photoURL} = props.message;
 
-  const messageClass = uid == auth.currentUser.uid ? 'sent' : 'received'; 
+  const messageClass = uid == auth.currentUser.uid ? 'sent' : 'received'; //if operator used to check if the current message should be displayed as sent or received
   return ( // we use those quotes so we can use the $
     <div className={`message ${messageClass}`}> 
       <img src ={photoURL}/>
