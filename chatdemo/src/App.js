@@ -58,7 +58,7 @@ function ChatRoom(){
   const messageRef = firestore.collection('messages');
   const query = messageRef.orderBy('createdAt').limit(25);
 
-  const [messages] = useCollectionData(query, {idField: 'id'});
+  const [messages] = useCollectionData(query, {idField: 'id'}); //data hook, listening to query
   return(
     <>
       <div>
@@ -69,8 +69,15 @@ function ChatRoom(){
 }
 
 function ChatMessage(props){
-  const {text, uid} = props.message;
-  return <p>{text}</p>
+  const {text, uid, photoURL} = props.message;
+
+  const messageClass = uid == auth.currentUser.uid ? 'sent' : 'received'; 
+  return ( // we use those quotes so we can use the $
+    <div className={`message ${messageClass}`}> 
+      <img src ={photoURL}/>
+      <p>{text}</p>
+      </div>
+  )
 }
 
 export default App;
