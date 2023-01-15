@@ -22,16 +22,21 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const firestore = firebase.firestore();
 const analytics = firebase.analytics();
+ 
 
 function App() {
   const [user] = useAuthState(auth); //hook, returns object if logged in,return null if not
+  const [currentlyInChatRoom, setCurrentlyInChatRoom] = useState(true); //to change something they HAVE to be states
+  
   return (
     <div className="App">
       <header>
-      <SignOut />
+        <h2>CHATROOM NAME</h2>
+        <BackButton currentlyInChatRoom = {currentlyInChatRoom} setCurrentlyInChatRoom = {setCurrentlyInChatRoom}/>
+        <SignOut />
       </header>
       <section>
-        {user ? <ChatRoom /> : <SignIn />}
+        {user ? <ChatRoomList /> : <SignIn />}
       </section>
     </div>
   );
@@ -52,8 +57,42 @@ function SignIn(){
   )
 }
 
+function ModalDialog({ children }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <button onClick={() => setIsOpen(true)}>Open Modal</button>
+      {isOpen && (
+        <div className="modal-overlay">
+          <div className="modal-dialog">
+            <button onClick={() => setIsOpen(false)}>Close</button>
+            {children}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ChatRoomList(props){
+  const {setIsOpen} = props; 
+  return(
+  <main>
+    <button onClick={setIsOpen(true)}><img src='https://www.nicepng.com/png/full/251-2519428_0-add-icon-white-png.png'/></button>
+  </main>
+  )
+}
+
+function BackButton(props){
+  const { currentlyInChatRoom, setCurrentlyInChatRoom } = props;
+  return currentlyInChatRoom &&(
+    <button onClick= {() => setCurrentlyInChatRoom(false)}>Go back</button>
+  )
+}
+
 function SignOut(){
-  return auth.currentUser && (
+  return auth.currentUser && ( //if auth is currentlly sign in, return the button, what i need is an if "currentlyInChatroom, display, else make false currentlyInChatroom"
     <button onClick={() => auth.signOut()}> Sign Out</button>
   )
 }
