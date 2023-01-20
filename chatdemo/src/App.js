@@ -89,7 +89,6 @@ function ChatRoom(){
         {messages && messages.map(msg => <ChatMessage key = {msg.id} message = {msg}/>)}
         <span ref={dummy}></span> 
       </main>
-
       <form onSubmit={sendMessage}>
         <input value={formValue} onChange={(e) => setFormValue(e.target.value)} placeholder="write your message here..."/>
         <button type='submit'>SEND</button>
